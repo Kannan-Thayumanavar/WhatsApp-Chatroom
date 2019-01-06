@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">WhatsApp Chatroom</string>
     <string name="text_textview">WhatsApp Chatroom</string>
-    <string name="text_edittext1">Enter phone number</string>
-    <string name="text_edittext2">Enter message (optional)</string>
+    <string name="text_edittext1">Phone number with Country code</string>
+    <string name="text_edittext2">Message (optional)</string>
     <string name="text_button">Open Chat</string>
 </resources>
