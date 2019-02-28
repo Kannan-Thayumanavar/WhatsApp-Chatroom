@@ -73,6 +73,7 @@
                 android:scrollbars="vertical"
                 android:focusable="true"
                 android:hint="@string/text_edittext2"
+                android:padding="10dp"
                 android:gravity="top"
                 android:textColorHint="#26A69A" />
 
