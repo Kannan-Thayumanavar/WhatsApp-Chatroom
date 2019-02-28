@@ -14,55 +14,41 @@ import android.widget.EditText;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class MainActivity extends Activity  {
-    Button b1;
-    EditText ed1,ed2;
-    String urlBegin = "https://wa.me/";
-    String url = null;
-    private WebView wv1;
+public class MainActivity extends Activity {
+    Button button;
+    EditText phoneEdit, msgEdit;
+    private WebView web;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        b1=(Button)findViewById(R.id.button);
-        ed1=(EditText)findViewById(R.id.editText);
-        ed2=(EditText)findViewById(R.id.editText2);
+        button = findViewById(R.id.button);
+        phoneEdit = findViewById(R.id.editText);
+        msgEdit = findViewById(R.id.editText2);
+        web = findViewById(R.id.webView);
 
-        wv1=(WebView)findViewById(R.id.webView);
-
-        b1.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phoneNo = ed1.getText().toString();
-                String message = ed2.getText().toString();
-                phoneNo = phoneNo.replace("+","");
-                if(phoneNo.matches("")){
+                String url = null;
+                String phoneNo = phoneEdit.getText().toString();
+                String message = msgEdit.getText().toString();
+                phoneNo = phoneNo.replace("+", "");
+                if (phoneNo.matches("")) {
                     Animation shake = AnimationUtils.loadAnimation(MainActivity.this, R.anim.shake);
-                    ed1.startAnimation(shake);
-                }
-                else{
+                    phoneEdit.startAnimation(shake);
+                } else {
                     try {
-                        url = encodeURL(phoneNo, message);
+                        url = Utils.encodeURL(phoneNo, message);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                    wv1.getSettings().setLoadsImagesAutomatically(true);
-                    wv1.getSettings().setJavaScriptEnabled(true);
-                    wv1.loadUrl(url);
+                    web.getSettings().setLoadsImagesAutomatically(true);
+                    web.getSettings().setJavaScriptEnabled(true);
+                    web.loadUrl(url);
                 }
-            }
-
-
-            public String encodeURL(String phoneNo, String message) throws UnsupportedEncodingException {
-                String encodedUrl = null;
-                if(message != null){
-                    encodedUrl = urlBegin + phoneNo + "?text=" + URLEncoder.encode(message, "UTF-8");
-                }
-                else{
-                    encodedUrl = urlBegin + phoneNo;
-                }
-                return encodedUrl;
             }
         });
     }
