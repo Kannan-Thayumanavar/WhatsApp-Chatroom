@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -13,12 +14,18 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.io.UnsupportedEncodingException;
+import com.crashlytics.android.Crashlytics;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
     Button button;
     EditText phoneEdit, msgEdit;
     private WebView web;
+    public static final String MIXPANEL_TOKEN = "90ebef0e23469e21410873e087a44482";
+    MixpanelAPI mixpanel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +37,7 @@ public class MainActivity extends Activity {
         msgEdit = findViewById(R.id.editText2);
         web = findViewById(R.id.webView);
         ColorStateList oldBgTint = phoneEdit.getBackgroundTintList();
+        this.mixpanel = MixpanelAPI.getInstance(this, MIXPANEL_TOKEN);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,11 +51,8 @@ public class MainActivity extends Activity {
                     phoneEdit.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
                     phoneEdit.setError("required");
                 } else {
-                    try {
-                        url = Utils.encodeURL(phoneNo, message);
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+                    url = Utils.getUrl(phoneNo, message);
+                    trackMixpanel(phoneNo, message, url);
                     web.getSettings().setLoadsImagesAutomatically(true);
                     web.getSettings().setJavaScriptEnabled(true);
                     web.loadUrl(url);
@@ -56,6 +61,28 @@ public class MainActivity extends Activity {
         });
 
         phoneEdit.addTextChangedListener(phoneEditListener(oldBgTint));
+    }
+
+    @Override
+    protected void onDestroy() {
+        this.mixpanel.flush();
+        super.onDestroy();
+    }
+
+    private void trackMixpanel(String phoneNo, String message, String url) {
+        JSONObject props = new JSONObject();
+        try {
+            props.put("phone", phoneNo);
+            props.put("message", message);
+            props.put("url", url);
+            mixpanel.track("data", props);
+            Log.i("mixpanel", props.toString(4));
+        } catch (JSONException e) {
+            Crashlytics.setString("phone", phoneNo);
+            Crashlytics.setString("message", message);
+            Crashlytics.setString("source", "mixpanel_tracking");
+            Crashlytics.logException(e);
+        }
     }
 
     private TextWatcher phoneEditListener(final ColorStateList oldBgTint) {
